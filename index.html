@@ -19,6 +19,7 @@ html{scroll-padding-top:env(safe-area-inset-top,0px)}
 body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
 header{position:sticky;top:env(safe-area-inset-top,0px);display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 16px;background:var(--bg);border-bottom:1px solid var(--line);z-index:5}
 header b{font-size:20px}
+.sair{border:0;background:var(--line);color:var(--ink);font:inherit;font-weight:600;padding:8px 14px;border-radius:10px;cursor:pointer}
 main{max-width:640px;margin:0 auto;padding:16px}
 h1{font-size:26px;line-height:1.15;margin:8px 0 4px;text-transform:capitalize}
 h2{font-size:19px;margin:24px 0 10px}
@@ -32,6 +33,8 @@ h2{font-size:19px;margin:24px 0 10px}
 .item .ben{font-size:19px;font-weight:650;margin:6px 0 2px}
 .item .val{font-size:22px;font-weight:750;white-space:nowrap;font-variant-numeric:tabular-nums}
 .item.done{opacity:.6}
+.item.ro{cursor:default}
+[hidden]{display:none!important}
 .tag{display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:600;color:var(--mut)}
 .tag i{width:12px;height:12px;border-radius:50%;border:1px solid rgba(128,128,128,.55)}
 .chip{display:inline-block;font-size:13px;font-weight:650;padding:2px 9px;border-radius:99px;background:var(--line);color:var(--mut);margin-left:6px}
@@ -67,10 +70,17 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 </head>
 <body>
 <header><b>Contas</b>
-<div class="seg" id="role"><button data-r="chefe" class="on">Diretor</button><button data-r="equipe">Equipe</button></div></header>
+<div style="display:flex;align-items:center;gap:12px"><span class="mut" id="quem" style="margin:0"></span><button class="sair" id="sair" hidden>Sair</button></div></header>
 <main>
-<section id="vChefe">
-<h1 id="data"></h1><div class="resumo" id="resumo"></div>
+<div class="seg" id="nav" hidden style="margin-bottom:14px"><button data-v="lancar" class="on">Lançar</button><button data-v="ver">Acompanhar</button></div>
+<section id="vLogin" hidden>
+<h1 style="text-transform:none">Quem está usando?</h1>
+<button class="big pri" id="bDir" style="font-size:22px;padding:22px">Diretor</button>
+<button class="big" id="bEq">Equipe</button>
+<div id="pinBox" hidden class="card" style="margin-top:14px"><label>Senha da equipe<input id="pin" type="password" inputmode="numeric" autocomplete="off"></label><button class="big pri" id="bPin">Entrar</button></div>
+</section>
+<section id="vChefe" hidden>
+<h1 id="data"></h1><p class="mut" id="ro" hidden style="margin:0">Somente visualização: quem paga é o Diretor.</p><div class="resumo" id="resumo"></div>
 <div class="seg tabs" id="tabs"><button data-t="pend" class="on">A pagar</button><button data-t="paga">Pagas</button></div>
 <div id="lista"></div>
 </section>
@@ -135,7 +145,7 @@ const pagas=C.filter(c=>c.st==="paga"&&c.pagoEm===hoje);
 const tot=pend.reduce((s,c)=>s+c.valor,0);
 $("#resumo").innerHTML=pend.length?`<div><small>${pend.length>1?"Contas":"Conta"} para pagar</small><strong>${pend.length}</strong></div><div class="tot"><small>Total a pagar</small><strong>${brl(tot)}</strong></div>`:`<div class="allok"><strong>Tudo pago por hoje ✓</strong></div>`;
 const list=tab==="pend"?pend:pagas;
-$("#lista").innerHTML=list.length?list.map(c=>`<div class="card item ${c.st==="paga"?"done":""}" data-act="abrir" data-id="${c.id}" tabindex="0">
+$("#lista").innerHTML=list.length?list.map(c=>`<div class="card item ${c.st==="paga"?"done":""}${role==="chefe"?"":" ro"}" ${role==="chefe"?`data-act="abrir" data-id="${c.id}" tabindex="0"`:""}>
 <div>${tag(c.emp)}${c.tipo==="pix"?'<span class="chip">Pix</span>':""}${c.venc<hoje&&c.st==="pend"?'<span class="chip bad">venceu ontem</span>':""}${c.st==="paga"?'<span class="chip ok">paga</span>':""}
 <div class="ben">${esc(c.ben)}</div></div><div class="val">${brl(c.valor)}</div></div>`).join(""):`<div class="empty">${tab==="pend"?"Nenhuma conta para pagar agora.":"Nenhuma conta paga hoje ainda."}</div>`}
 
@@ -155,10 +165,11 @@ $("#panel").innerHTML=h;$("#sheet").classList.add("open")}
 const fechar=()=>$("#sheet").classList.remove("open");
 
 document.addEventListener("click",e=>{
-const t=e.target.closest("[data-act],[data-r],[data-t],[data-k]");
+const t=e.target.closest("[data-act],[data-r],[data-t],[data-k],[data-v]");
 if(!t){if(e.target.id==="sheet")fechar();return}
 const d=t.dataset;
 if(d.r){role=d.r;document.querySelectorAll("#role button").forEach(b=>b.classList.toggle("on",b===t));$("#vChefe").hidden=role!=="chefe";$("#vEquipe").hidden=role!=="equipe";role==="chefe"?renderChefe():renderEquipe()}
+else if(d.v){vista(d.v)}
 else if(d.t){tab=d.t;document.querySelectorAll("#tabs button").forEach(b=>b.classList.toggle("on",b===t));renderChefe()}
 else if(d.k){tipo=d.k;document.querySelectorAll("#fTipo button").forEach(b=>b.classList.toggle("on",b===t));$("#lCod").textContent=tipo==="pix"?"Pix copia e cola":"Linha digitável";$("#fileLbl").firstChild.textContent=tipo==="pix"?"Anexar comprovante ou QR (opcional)":"Anexar boleto (PDF ou foto)"}
 else if(d.act==="abrir")abrir(+d.id);
@@ -183,8 +194,19 @@ if(!$("#fBen").value.trim()||!v||!$("#fVen").value||!$("#fCod").value.trim()){to
 C.push({id:n++,emp:$("#fEmp").value,ben:$("#fBen").value.trim(),valor:v,venc:$("#fVen").value,tipo,cod:$("#fCod").value.trim(),st:"pend"});
 ["#fBen","#fVal","#fCod"].forEach(s=>$(s).value="");$("#fFile").value="";$("#fileLbl").firstChild.textContent=tipo==="pix"?"Anexar comprovante ou QR (opcional)":"Anexar boleto (PDF ou foto)";
 renderEquipe();toast("Lançamento salvo")});
+const PIN="1234",K="contas-quem";
+const guarda=v=>{try{localStorage.setItem(K,v)}catch(e){}};
+const le=()=>{try{return localStorage.getItem(K)}catch(e){return null}};
+function vista(v){document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("on",b.dataset.v===v));$("#vEquipe").hidden=v!=="lancar";$("#vChefe").hidden=v!=="ver";v==="ver"?renderChefe():renderEquipe()}
+function entrar(r){role=r;$("#vLogin").hidden=true;$("#vChefe").hidden=r!=="chefe";$("#vEquipe").hidden=r!=="equipe";$("#quem").textContent=r==="chefe"?"Diretor":"Equipe";$("#sair").hidden=false;$("#nav").hidden=r!=="equipe";$("#ro").hidden=r!=="equipe";r==="chefe"?renderChefe():renderEquipe();if(r==="equipe")vista("lancar")}
+function login(){role=null;$("#vChefe").hidden=true;$("#vEquipe").hidden=true;$("#vLogin").hidden=false;$("#pinBox").hidden=true;$("#pin").value="";$("#quem").textContent="";$("#sair").hidden=true;$("#nav").hidden=true}
+$("#bDir").onclick=()=>{guarda("chefe");entrar("chefe")};
+$("#bEq").onclick=()=>{$("#pinBox").hidden=false;$("#pin").focus()};
+$("#bPin").onclick=()=>{if($("#pin").value===PIN){guarda("equipe");entrar("equipe")}else{toast("Senha incorreta");$("#pin").value=""}};
+$("#sair").onclick=()=>{guarda("");login()};
+const salvo=le();
+salvo==="chefe"||salvo==="equipe"?entrar(salvo):login();
 if("serviceWorker" in navigator){navigator.serviceWorker.register("service-worker.js").catch(()=>{})}
-renderChefe();
 </script>
 </body>
 </html>
