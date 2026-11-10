@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Contas</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1d4ed8">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+
+<style>
+:root{--bg:#f4f6f8;--card:#fff;--ink:#101828;--mut:#667085;--line:#e4e7ec;--pri:#1d4ed8;--onpri:#fff;--ok:#15803d;--okbg:#dcfce7;--bad:#b42318;--badbg:#fee4e2;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1116;--card:#171b22;--ink:#f2f4f7;--mut:#98a2b3;--line:#2a303b;--pri:#6ea0ff;--onpri:#0b1020;--ok:#4ade80;--okbg:#12301d;--bad:#fda29b;--badbg:#3a1613}}
+:root[data-theme="dark"]{--bg:#0e1116;--card:#171b22;--ink:#f2f4f7;--mut:#98a2b3;--line:#2a303b;--pri:#6ea0ff;--onpri:#0b1020;--ok:#4ade80;--okbg:#12301d;--bad:#fda29b;--badbg:#3a1613}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{position:sticky;top:env(safe-area-inset-top,0px);display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 16px;background:var(--bg);border-bottom:1px solid var(--line);z-index:5}
+header b{font-size:20px}
+main{max-width:640px;margin:0 auto;padding:16px}
+h1{font-size:26px;line-height:1.15;margin:8px 0 4px;text-transform:capitalize}
+h2{font-size:19px;margin:24px 0 10px}
+.mut{color:var(--mut);margin:0 0 14px}
+.seg{display:inline-flex;background:var(--line);border-radius:12px;padding:3px;gap:3px}
+.seg button{border:0;background:none;color:var(--mut);font:inherit;font-weight:600;padding:8px 16px;border-radius:9px;cursor:pointer}
+.seg button.on{background:var(--card);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.12)}
+.tabs{display:flex;margin:6px 0 16px}.tabs button{flex:1;padding:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:10px}
+.item{display:flex;justify-content:space-between;align-items:center;gap:12px;cursor:pointer}
+.item .ben{font-size:19px;font-weight:650;margin:6px 0 2px}
+.item .val{font-size:22px;font-weight:750;white-space:nowrap;font-variant-numeric:tabular-nums}
+.item.done{opacity:.6}
+.tag{display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:600;color:var(--mut)}
+.tag i{width:12px;height:12px;border-radius:50%;border:1px solid rgba(128,128,128,.55)}
+.chip{display:inline-block;font-size:13px;font-weight:650;padding:2px 9px;border-radius:99px;background:var(--line);color:var(--mut);margin-left:6px}
+.chip.bad{background:var(--badbg);color:var(--bad)}.chip.ok{background:var(--okbg);color:var(--ok)}
+.empty{text-align:center;color:var(--mut);padding:36px 12px}
+.resumo{display:flex;gap:10px;margin:14px 0 20px}
+.resumo>div{flex:1;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px 18px}
+.resumo .tot{flex:2;background:var(--pri);border-color:var(--pri);color:var(--onpri)}
+.resumo small{display:block;font-size:15px;font-weight:600;color:var(--mut);margin-bottom:2px}
+.resumo .tot small{color:inherit;opacity:.85}
+.resumo strong{display:block;font-size:34px;line-height:1.1;font-weight:800;font-variant-numeric:tabular-nums}
+.resumo .allok{background:var(--okbg);border-color:var(--ok);color:var(--ok)}
+.resumo .allok strong{font-size:26px}
+label{display:block;font-weight:600;margin-bottom:14px}
+input,select,textarea{display:block;width:100%;margin-top:6px;padding:13px;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:12px}
+.file{border:2px dashed var(--line);border-radius:14px;padding:16px;text-align:center;color:var(--pri);cursor:pointer}
+.big{display:block;width:100%;margin-top:10px;padding:16px;font:inherit;font-weight:700;border-radius:14px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.big.pri{background:var(--pri);color:var(--onpri);border-color:var(--pri)}
+.big.ok{background:var(--ok);color:var(--bg);border-color:var(--ok)}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--pri);outline-offset:2px}
+#sheet{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:flex-end;justify-content:center;z-index:20}
+#sheet.open{display:flex}
+.panel{position:relative;width:100%;max-width:640px;max-height:92%;overflow:auto;background:var(--card);border-radius:22px 22px 0 0;padding:22px 18px calc(18px + env(safe-area-inset-bottom,0px))}
+.panel h2{margin:6px 0 0;font-size:24px}
+.panel .val{font-size:34px;font-weight:800;margin:2px 0 14px;font-variant-numeric:tabular-nums}
+.x{position:absolute;right:14px;top:12px;width:40px;height:40px;border:0;border-radius:50%;background:var(--line);color:var(--ink);font-size:18px;cursor:pointer}
+.bar{background:#fff;border-radius:12px;padding:14px;overflow-x:auto}
+.bar svg{display:block;width:100%;min-width:300px;height:96px}
+.code{font:14px/1.4 ui-monospace,Menlo,Consolas,monospace;word-break:break-all;color:var(--mut);margin:10px 0 0}
+#toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:12px 20px;border-radius:99px;font-weight:600;opacity:0;pointer-events:none;transition:opacity .2s;z-index:30}
+#toast.on{opacity:1}
+</style>
+</head>
+<body>
+<header><b>Contas</b>
+<div class="seg" id="role"><button data-r="chefe" class="on">Diretor</button><button data-r="equipe">Equipe</button></div></header>
+<main>
+<section id="vChefe">
+<h1 id="data"></h1><div class="resumo" id="resumo"></div>
+<div class="seg tabs" id="tabs"><button data-t="pend" class="on">A pagar</button><button data-t="paga">Pagas</button></div>
+<div id="lista"></div>
+</section>
+<section id="vEquipe" hidden>
+<h1>Novo lançamento</h1><p class="mut">Protótipo: a leitura do boleto pela IA é simulada.</p>
+<div class="card">
+<label>Empresa<select id="fEmp"></select></label>
+<div class="seg" id="fTipo" style="margin-bottom:14px"><button data-k="boleto" class="on">Boleto</button><button data-k="pix">Pix</button></div>
+<label class="file" id="fileLbl">Anexar boleto (PDF ou foto)<input type="file" id="fFile" accept="application/pdf,image/*" hidden></label>
+<label>Quem recebe<input id="fBen" placeholder="Ex.: Energia, Condomínio"></label>
+<label>Vencimento<input type="date" id="fVen"></label>
+<label>Valor (R$)<input id="fVal" inputmode="decimal" placeholder="0,00"></label>
+<label><span id="lCod">Linha digitável</span><textarea id="fCod" rows="2"></textarea></label>
+<button class="big pri" id="salvar">Salvar lançamento</button>
+</div>
+<h2>Lançados</h2><div id="lancados"></div>
+</section>
+</main>
+<div id="sheet"><div class="panel" id="panel"></div></div>
+<div id="toast"></div>
+<script>
+const EMP={LUMINY:"#3f4650","A&B":"#00B7C3",MODO:"#0066CC",ABLA:"#d9822b",ACM:"#00B566",SOHO:"#8b5a2b",ANDREI:"#7cc4fa"};
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fmt=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+const iso=o=>{const d=new Date();d.setDate(d.getDate()+o);return fmt(d)};
+const brl=v=>v.toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
+const hoje=iso(0);
+const L="2379338128600078271369500006330597552000";
+const PIX="00020126580014br.gov.bcb.pix0136chave-exemplo5204000053039865802BR5909EXEMPLO6009SAO PAULO62070503***6304ABCD";
+let n=10;
+const C=[
+{id:1,emp:"LUMINY",ben:"Energia elétrica",valor:1280.5,venc:iso(0),tipo:"boleto",cod:L+"0370000",st:"pend"},
+{id:2,emp:"SOHO",ben:"Condomínio",valor:3450,venc:iso(0),tipo:"boleto",cod:L+"3450000",st:"pend"},
+{id:3,emp:"ANDREI",ben:"Fornecedor de materiais",valor:900,venc:iso(0),tipo:"pix",cod:PIX,st:"pend"},
+{id:4,emp:"MODO",ben:"Internet",valor:289.9,venc:iso(-1),tipo:"boleto",cod:L+"0289900",st:"pend"},
+{id:5,emp:"A&B",ben:"Seguro",valor:612,venc:iso(0),tipo:"boleto",cod:L+"0612000",st:"paga",pagoEm:hoje},
+{id:6,emp:"ACM",ben:"Contador",valor:1500,venc:iso(2),tipo:"pix",cod:PIX,st:"pend"},
+{id:7,emp:"ABLA",ben:"Telefone",valor:340,venc:iso(0),tipo:"boleto",cod:L+"0340000",st:"pend"},
+{id:8,emp:"ACM",ben:"Água e esgoto",valor:215.4,venc:iso(0),tipo:"boleto",cod:L+"0215400",st:"pend"}];
+let role="chefe",tab="pend",tipo="boleto";
+
+/* código de barras (44 dígitos) a partir da linha digitável (47) */
+const barra=l=>{l=l.replace(/\D/g,"");return l.length===47?l.slice(0,4)+l[32]+l.slice(33)+l.slice(4,9)+l.slice(10,20)+l.slice(21,31):l};
+function itf(d){
+const P=["nnwwn","wnnnw","nwnnw","wwnnn","nnwnw","wnwnn","nwwnn","nnnww","wnnwn","nwnwn"];
+let s=["n","n","n","n"];
+for(let i=0;i<d.length;i+=2){const a=P[+d[i]],b=P[+d[i+1]];for(let k=0;k<5;k++){s.push(a[k],b[k])}}
+s.push("w","n","n");
+let x=0,r="";
+s.forEach((c,i)=>{const w=c==="w"?3:1;if(i%2===0)r+=`<rect x="${x}" y="0" width="${w}" height="80" fill="#000"/>`;x+=w});
+return `<svg viewBox="0 0 ${x} 80" preserveAspectRatio="none" role="img" aria-label="Código de barras">${r}</svg>`}
+
+const tag=e=>`<span class="tag"><i style="background:${EMP[e]}"></i>${esc(e)}</span>`;
+const dia=d=>d===hoje?"hoje":d===iso(-1)?"ontem":d.split("-").reverse().slice(0,2).join("/");
+function toast(t){const e=$("#toast");e.textContent=t;e.classList.add("on");setTimeout(()=>e.classList.remove("on"),1800)}
+
+function renderChefe(){
+$("#data").textContent=new Date().toLocaleDateString("pt-BR",{weekday:"long",day:"numeric",month:"long"});
+const pend=C.filter(c=>c.st==="pend"&&c.venc<=hoje).sort((a,b)=>a.venc.localeCompare(b.venc));
+const pagas=C.filter(c=>c.st==="paga"&&c.pagoEm===hoje);
+const tot=pend.reduce((s,c)=>s+c.valor,0);
+$("#resumo").innerHTML=pend.length?`<div><small>${pend.length>1?"Contas":"Conta"} para pagar</small><strong>${pend.length}</strong></div><div class="tot"><small>Total a pagar</small><strong>${brl(tot)}</strong></div>`:`<div class="allok"><strong>Tudo pago por hoje ✓</strong></div>`;
+const list=tab==="pend"?pend:pagas;
+$("#lista").innerHTML=list.length?list.map(c=>`<div class="card item ${c.st==="paga"?"done":""}" data-act="abrir" data-id="${c.id}" tabindex="0">
+<div>${tag(c.emp)}${c.tipo==="pix"?'<span class="chip">Pix</span>':""}${c.venc<hoje&&c.st==="pend"?'<span class="chip bad">venceu ontem</span>':""}${c.st==="paga"?'<span class="chip ok">paga</span>':""}
+<div class="ben">${esc(c.ben)}</div></div><div class="val">${brl(c.valor)}</div></div>`).join(""):`<div class="empty">${tab==="pend"?"Nenhuma conta para pagar agora.":"Nenhuma conta paga hoje ainda."}</div>`}
+
+function renderEquipe(){
+const l=[...C].sort((a,b)=>a.venc.localeCompare(b.venc));
+$("#lancados").innerHTML=l.map(c=>`<div class="card item" style="cursor:default"><div>${tag(c.emp)}<span class="chip">${c.tipo==="pix"?"Pix":"Boleto"}</span><span class="chip ${c.st==="paga"?"ok":""}">${c.st==="paga"?"paga":"vence "+dia(c.venc)}</span>
+<div class="ben">${esc(c.ben)}</div></div><div class="val">${brl(c.valor)}</div></div>`).join("")}
+
+function abrir(id){
+const c=C.find(x=>x.id===id);
+let h=`<button class="x" data-act="fechar" aria-label="Fechar">✕</button>${tag(c.emp)}<h2>${esc(c.ben)}</h2><div class="val">${brl(c.valor)}</div>`;
+if(c.tipo==="boleto"){h+=`<div class="bar">${itf(barra(c.cod))}</div><p class="mut" style="margin-top:10px">Aponte a câmera do app do banco para as barras acima.</p>
+<button class="big pri" data-act="copiar" data-v="${esc(c.cod)}">Copiar código do boleto</button><p class="code">${esc(c.cod)}</p>`}
+else{h+=`<p class="mut">Pagamento por Pix</p><button class="big pri" data-act="copiar" data-v="${esc(c.cod)}">Copiar Pix copia e cola</button>`}
+h+=c.st==="paga"?`<button class="big" data-act="desfazer" data-id="${id}">Voltar para a pagar</button>`:`<button class="big ok" data-act="paguei" data-id="${id}">✓ Já paguei</button>`;
+$("#panel").innerHTML=h;$("#sheet").classList.add("open")}
+const fechar=()=>$("#sheet").classList.remove("open");
+
+document.addEventListener("click",e=>{
+const t=e.target.closest("[data-act],[data-r],[data-t],[data-k]");
+if(!t){if(e.target.id==="sheet")fechar();return}
+const d=t.dataset;
+if(d.r){role=d.r;document.querySelectorAll("#role button").forEach(b=>b.classList.toggle("on",b===t));$("#vChefe").hidden=role!=="chefe";$("#vEquipe").hidden=role!=="equipe";role==="chefe"?renderChefe():renderEquipe()}
+else if(d.t){tab=d.t;document.querySelectorAll("#tabs button").forEach(b=>b.classList.toggle("on",b===t));renderChefe()}
+else if(d.k){tipo=d.k;document.querySelectorAll("#fTipo button").forEach(b=>b.classList.toggle("on",b===t));$("#lCod").textContent=tipo==="pix"?"Pix copia e cola":"Linha digitável";$("#fileLbl").firstChild.textContent=tipo==="pix"?"Anexar comprovante ou QR (opcional)":"Anexar boleto (PDF ou foto)"}
+else if(d.act==="abrir")abrir(+d.id);
+else if(d.act==="fechar")fechar();
+else if(d.act==="copiar"){(navigator.clipboard?navigator.clipboard.writeText(d.v):Promise.reject()).then(()=>toast("Copiado")).catch(()=>toast("Não deu para copiar. Selecione o texto."))}
+else if(d.act==="paguei"){const c=C.find(x=>x.id===+d.id);c.st="paga";c.pagoEm=hoje;fechar();renderChefe();toast("Marcada como paga")}
+else if(d.act==="desfazer"){const c=C.find(x=>x.id===+d.id);c.st="pend";delete c.pagoEm;fechar();renderChefe()}
+});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")fechar();if(e.key==="Enter"&&e.target.dataset&&e.target.dataset.act==="abrir")abrir(+e.target.dataset.id)});
+
+$("#fEmp").innerHTML=Object.keys(EMP).map(e=>`<option>${esc(e)}</option>`).join("");
+$("#fVen").value=hoje;
+$("#fFile").addEventListener("change",e=>{
+if(!e.target.files.length)return;
+const lb=$("#fileLbl").firstChild;lb.textContent="Lendo com IA…";
+setTimeout(()=>{lb.textContent="Dados preenchidos. Confira antes de salvar.";
+$("#fBen").value="Energia elétrica";$("#fVal").value="1.280,50";
+$("#fCod").value=tipo==="pix"?PIX:L+"0370000"},900)});
+$("#salvar").addEventListener("click",()=>{
+const v=parseFloat($("#fVal").value.replace(/\./g,"").replace(",","."));
+if(!$("#fBen").value.trim()||!v||!$("#fVen").value||!$("#fCod").value.trim()){toast("Preencha todos os campos");return}
+C.push({id:n++,emp:$("#fEmp").value,ben:$("#fBen").value.trim(),valor:v,venc:$("#fVen").value,tipo,cod:$("#fCod").value.trim(),st:"pend"});
+["#fBen","#fVal","#fCod"].forEach(s=>$(s).value="");$("#fFile").value="";$("#fileLbl").firstChild.textContent=tipo==="pix"?"Anexar comprovante ou QR (opcional)":"Anexar boleto (PDF ou foto)";
+renderEquipe();toast("Lançamento salvo")});
+if("serviceWorker" in navigator){navigator.serviceWorker.register("service-worker.js").catch(()=>{})}
+renderChefe();
+</script>
+</body>
+</html>
